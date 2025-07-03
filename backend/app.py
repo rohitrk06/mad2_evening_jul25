@@ -20,6 +20,74 @@ def create_app():
 
 app, api = create_app()
 
+
+@app.route('/api/register', methods=['POST'])
+def register():
+    user_data = request.get_json()
+
+    # Data validation
+    if not user_data:
+        return make_response(
+            jsonify({
+                'message': 'Request body should not be empty',
+            }),
+            400
+        )
+    
+    username = user_data.get('username',None)
+    password = user_data.get('password', None)
+    email = user_data.get('email', None)
+
+    if not username or not password or not email:
+        return make_response(
+            jsonify({
+                'message': 'Username, password and email are required',
+            }),
+            400
+        )
+    
+    user = user_datastore.find_user(username=username)
+    if user:
+        return make_response(
+            jsonify({
+                'message': 'User with this username already exists',
+            }),
+            400
+        )
+
+    user = user_datastore.find_user(email=email)
+    if user:
+        return make_response(
+            jsonify({
+                'message': 'User with this email already exists',
+            }),
+            400
+        )
+
+    if len(password) < 6:
+        return make_response(
+            jsonify({
+                'message': 'Password must be at least 6 characters long',
+            }),
+            400
+        )
+    
+    role = user_datastore.find_role('User')
+    user_datastore.create_user(
+        username=username,
+        email=email,
+        password = password,
+        roles=[role]
+    )
+    db.session.commit()
+
+    return make_response(
+        jsonify({
+            'message': 'User registered successfully',
+        }),
+        201
+    )
+
 # app.security.user_datastore
 
 # @app.route('/api/v2/login', methods = ['POST'])
@@ -79,6 +147,9 @@ app, api = create_app()
 from controllers.auth_apis import LoginAPI, LogoutAPI
 api.add_resource(LoginAPI, '/api/login')
 api.add_resource(LogoutAPI, '/api/logout')
+
+from controllers.crud_apis import CategoriesCRUD
+api.add_resource(CategoriesCRUD, '/api/categories', '/api/categories/<int:category_id>')
 
 if __name__=='__main__':
     create_tables()

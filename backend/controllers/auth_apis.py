@@ -82,4 +82,3 @@ class LoginAPI(Resource):
         }
 
         return make_response(jsonify(response), 200)
-
