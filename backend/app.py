@@ -6,6 +6,8 @@ from controllers.database import db
 from flask_restful import Api
 from controllers.create_tables import create_tables
 
+from flask_cors import CORS
+
 
 def create_app():
     app = Flask(__name__)
@@ -19,6 +21,7 @@ def create_app():
 
 
 app, api = create_app()
+CORS(app, origins=["http://localhost:5173", "http://127.0.0.1:5000"])
 
 
 @app.route('/api/register', methods=['POST'])
