@@ -23,6 +23,32 @@ def create_app():
 app, api = create_app()
 CORS(app, origins=["http://localhost:5173", "http://127.0.0.1:5000"])
 
+@app.route('/api/check_username', methods=['POST'])
+def check_username():
+    data = request.get_json()
+
+    if not data or 'username' not in data:
+        return make_response(
+            jsonify({
+                'message': 'Request body should contain a username',
+            }),
+            400
+        )
+    
+    username = data['username']
+
+    user = user_datastore.find_user(username=username)
+    available = 0
+    if user: 
+        available = 1
+    
+    return make_response(
+        jsonify({
+            'available': available,
+        }),
+        200
+    )
+    
 
 @app.route('/api/register', methods=['POST'])
 def register():
