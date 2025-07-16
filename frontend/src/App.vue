@@ -1,6 +1,21 @@
 <script setup>
 
 import { RouterLink, RouterView} from 'vue-router';
+import { useMessageStore } from './stores/messageStore';
+import { useAuthStore } from './stores/authStore';
+
+
+
+const messageStore = useMessageStore();
+const authStore = useAuthStore();
+
+async function logout(){
+    //Sent the fetch request to the backend to logout
+    // Once you get response ok
+
+    authStore.logout();
+    messageStore.setMessage('You have been logged out successfully');
+}
 
 </script>
 
@@ -14,11 +29,17 @@ import { RouterLink, RouterView} from 'vue-router';
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
+            <li class="nav-item" v-if="!authStore.isAuthenticated">
               <RouterLink class="nav-link active" to="/login">Login</RouterLink>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" v-if="!authStore.isAuthenticated">
               <RouterLink class="nav-link active" to="/register">Register</RouterLink>
+            </li>
+            <li class="nav-item" v-if="authStore.isAuthenticated">
+              <p class="nav-link">Welcome {{ authStore.getUserDetail.username }}</p>
+            </li>
+            <li class="nav-item" v-if="authStore.isAuthenticated">
+              <button class="nav-link active" @click="logout">Logout</button>
             </li>
           </ul>
           <form class="d-flex" role="search">
@@ -28,6 +49,10 @@ import { RouterLink, RouterView} from 'vue-router';
         </div>
       </div>
     </nav>
+
+    <div class="alert alert-success" v-if="messageStore.getMessage">
+      {{ messageStore.getMessage }}
+    </div>
 
     <RouterView/>
 

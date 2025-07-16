@@ -22,6 +22,13 @@
 
 <script setup>
 import {ref} from 'vue';
+import { useMessageStore } from '@/stores/messageStore';
+import { useAuthStore } from '@/stores/authStore';
+import { useRouter } from 'vue-router';
+
+const messageStore = useMessageStore();
+const authStore = useAuthStore();
+const router = useRouter();
 
 const username = ref('');
 const password = ref('');
@@ -77,9 +84,10 @@ async function login(){
         const data = await response.json();
         console.log(data);
 
-        localStorage.setItem('auth_token',data.data.auth_token);
-        alert(data.message)
-        return;
+        authStore.setAuthToken(data.data.auth_token);
+        authStore.setUserDetails(data.data.user);
+        messageStore.setMessage(data.message);
+        router.push('/');
         // localStorage.removeItem('token')
         
     }
